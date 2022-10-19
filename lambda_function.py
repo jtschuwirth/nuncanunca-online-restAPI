@@ -35,18 +35,18 @@ def getPlayersInChat(
     id: int=0
     ):
     try:
-        connection_ids = []
+        players = []
         scan_response = table.scan()
         for item in scan_response['Items']:
             if item["turn_status"] == "hosting": 
                     continue
-            connection_ids.append(item["connection_id"])
+            players.append({"connection_id": item["connection_id"], "user_name":item["user_name"]})
     except Exception as e:
         print(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     response.status_code=status.HTTP_200_OK
-    return connection_ids
+    return players
 
 
 #uvicorn lambda_function:app --reload --port 8081
