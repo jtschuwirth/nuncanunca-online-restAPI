@@ -48,6 +48,37 @@ def getPlayersInRoom(
     response.status_code=status.HTTP_200_OK
     return players
 
+@app.post("/nuncanunca/online/changelevel")
+def changeLevel(
+    response: Response,
+    room_id: str,
+    level: int=1
+    ):
+    try:
+        table = initTable()
+        scan_response = table.scan(
+            FilterExpression="room_id = :id",
+            ExpressionAttributeValues={
+                ":id": room_id   
+        })
+        
+        for item in scan_response['Items']:
+            if item["turn_status"] == "hosting":
+                connection_id = item["connection_id"]
+
+        table.update_item(
+            Key={'connection_id': connection_id},
+            UpdateExpression = "SET lvl = :lvl",
+            ExpressionAttributeValues={
+                ':lvl': level
+        })
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    response.status_code=status.HTTP_200_OK
+    return "Success"
 
 #uvicorn lambda_function:app --reload --port 8081
 lambda_handler = Mangum(app, lifespan="off")
